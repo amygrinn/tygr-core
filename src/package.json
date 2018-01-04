@@ -1,0 +1,20 @@
+{
+  "name": "@tygr/core",
+  "version": "1.0.0",
+  "description": "Combine redux capable node modules into angular projects with ease.",
+  "main": "dist/index.js",
+  "scripts": {},
+  "keywords": [
+    "Angular",
+    "AngularTS",
+    "Redux",
+    "Flux"
+  ],
+  "author": "Tyler Grinn",
+  "license": "MIT",
+  "dependencies": {
+    "@angular/core": "^5.1.2",
+    "redux": "^3.7.2",
+    "rxjs": "^5.5.6"
+  }
+}
