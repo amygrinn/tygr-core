@@ -1,3 +1,5 @@
+import { Injectable } from '@angular/core';
+
 import { Observable } from 'rxjs/Observable';
 import { bindCallback } from 'rxjs/observable/bindCallback';
 import { Subject } from 'rxjs/Subject';
@@ -5,7 +7,7 @@ import 'rxjs/add/operator/map';
 
 import {
   Action,
-  Store,
+  Store as IStore,
   createStore,
   applyMiddleware,
   combineReducers,
@@ -15,68 +17,70 @@ import {
   Middleware,
 } from 'redux';
 
+import { Selector } from './selector';
 import { StoreConfig } from './store-config';
-
 import { effectsMiddleware } from './effects.middleware';
+
+const defaultState = { root: '' };
+const defaultReducer: Reducer<string> = (state, action) => '';
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 declare var window: any;
 
-export class TygrStoreSingleton implements Store<any> {
+export class TygrStore implements IStore<any> {
 
-  private store: Store<any>;
+  private store: IStore<any>;
 
-  private configs = [];
+  private configs: StoreConfig[] = [];
 
-  private middlewares: Middleware[] = [effectsMiddleware];
+  constructor(
+    configs?: StoreConfig[]
+  ) {
 
-  private defaultReducer: Reducer<null> = (state, action) => null;
+    if (configs) {
+      this.configs = configs;
+    }
 
-  private composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
-  constructor() {
     this.store = this.createStore()
   }
 
-  public injectConfig(config: StoreConfig<any>) {
-    if (!this.has(config)) {
-      this.configs.push(config);
-      this.refreshReducer();
-    } else {
-      console.error('Configuration already exists in store, did you import it into two modules?');
+  public injectConfigs(...configs: StoreConfig[]) {
+    configs.forEach((config: StoreConfig) => {
+      if (this.has(config)) {
+        console.error('Configuration already exists in store, did you import it into two modules?');
+      } else {
+        this.configs.unshift(config);
+      }
+    });
+
+    if (configs.includes(config => config.middlewares)) {
+      this.store = this.createStore();
+    }
+
+    if (configs.includes(config => config.reducer)) {
+      this.replaceReducer(this.getReducer());
     }
   }
 
-  public injectMiddleware(middleware: Middleware) {
-    this.middlewares.push(middleware);
-    this.store = this.createStore();
-  }
-
-  public select<T>(selector: (state) => T): T {
+  public select<T>(selector: Selector<T>): T {
     return selector(this.getState());
   }
 
-  public select$<T>(selector: (state) => T): Observable<T> {
+  public select$<T>(selector: Selector<T>): Observable<T> {
     return bindCallback(this.subscribe)()
       .map(() => selector(this.getState()));
   }
 
-  public has(...configs: StoreConfig<any>[]): boolean {
+  public require(...configs: StoreConfig[]): boolean {
+    configs.forEach((config: StoreConfig) => {
+      if (!this.has(config)) {
+        console.error(`Store config for ${config.name} does not exist. Make sure to import it into a module`);
+        return false;
+      }
+    })
 
-    if (this.configs.length > 0) {
-
-      configs.forEach((config: StoreConfig<any>) => {
-
-        if (!this.configs.find(
-          (c: StoreConfig<any>) => config.equals(c)
-        )) {
-          return false;
-        }
-      });
-
-      return true;
-    }
-
-    return false;
+    return true;
   }
 
   public dispatch(action) {
@@ -95,34 +99,55 @@ export class TygrStoreSingleton implements Store<any> {
     return this.store.replaceReducer(reducer);
   }
 
-  private createStore(): Store<any> {
+  private createStore(): IStore<any> {
     return createStore(
       this.getReducer(),
       this.store
         ? this.store.getState()
-        : null,
-      this.composeEnhancers(
-        applyMiddleware(...this.middlewares)
+        : defaultState,
+      composeEnhancers(
+        applyMiddleware(...this.getMiddlewares())
       )
     );
-  }
-
-  private refreshReducer() {
-    this.replaceReducer(this.getReducer());
   }
 
   private getReducer(): Reducer<any> {
     let reducersMap;
 
-    if (this.configs.length > 0) {
+    let reducerConfigs: StoreConfig[] =
+      this.configs.filter((config: StoreConfig) => config.reducer)
+
+    if (reducerConfigs.length > 0) {
       reducersMap = {};
-      this.configs.forEach(config =>
+      reducerConfigs.forEach((config: StoreConfig) =>
         reducersMap[config.name] = config.reducer
       );
     } else {
-      reducersMap = { root: this.defaultReducer };
+      reducersMap = { root: defaultReducer };
     }
 
     return combineReducers(reducersMap);
+  }
+
+  private getMiddlewares(): Middleware[] {
+    return [].concat(
+      ...this.configs.map(config => config.middlewares),
+      [effectsMiddleware]
+    );
+  }
+
+  private has(config: StoreConfig): boolean {
+
+    if (this.configs.length === 0) {
+      return false;
+    }
+
+    this.configs.forEach((c: StoreConfig) => {
+      if (c.name === config.name) {
+        return true;
+      }
+    });
+
+    return false;
   }
 }

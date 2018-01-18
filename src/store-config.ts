@@ -1,17 +1,10 @@
-import { Reducer } from 'redux';
+import { Reducer, Middleware } from 'redux';
 
-export class StoreConfig<T> {
+import { Effects } from './effects';
 
-  constructor(
-    public name: string,
-    public reducer: Reducer<T>
-  ) { }
-
-  public equals(other: StoreConfig<T>): boolean {
-    return (
-      this.name === other.name
-      &&
-      this.reducer.toString() === other.reducer.toString()
-    );
-  }
+export interface StoreConfig {
+  name: string;
+  reducer?: Reducer<any>;
+  effects?: Effects;
+  middlewares?: Middleware[];
 }

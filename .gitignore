@@ -1,3 +1,2 @@
-demo/node_modules
-src/node_modules
-src/dist
+**/node_modules
+**/dist

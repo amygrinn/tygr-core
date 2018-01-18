@@ -1,4 +1,9 @@
-export { TygrStoreSingleton } from './tygr.store';
+export { TygrStore } from './tygr.store';
 export { ofType } from './of-type';
+export { Selector } from './selector';
 export { StoreConfig } from './store-config';
-export { actions$ } from './effects.middleware';
+export { actions$, effectsMiddleware } from './effects.middleware';
+export { Effects } from './effects';
+export { StoreService } from './store-service';
+export { TygrModule, Actions$, Store } from './tygr.module';
+export { Action, Middleware, Reducer, Unsubscribe } from 'redux';
