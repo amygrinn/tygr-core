@@ -8,6 +8,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "es6",
+    "module": "commonjs",
     "typeRoots": [
       "node_modules/@types"
     ],
@@ -16,8 +17,8 @@
       "dom"
     ]
   },
-  "exclude": [
-    "node-scripts",
+  "exclude": [    
+    "scripts",
     "dist"
   ]
 }

@@ -17,4 +17,6 @@ import { TygrStore } from './tygr.store';
     Store
   ]
 })
-export class TygrModule { }
+export class TygrModule {
+  constructor(private actions: Actions$, private store: Store) { }
+}

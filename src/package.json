@@ -1,10 +1,11 @@
 {
   "name": "@tygr/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Combine redux capable node modules into angular projects with ease.",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc && tsc -p node-scripts/tsconfig.json"
+    "build": "tsc"
   },
   "keywords": [
     "Angular",
@@ -12,19 +13,17 @@
     "Redux",
     "Flux"
   ],
-  "bin": {
-    "tygr-install-config": "dist/install-config.js",
-    "tygr-copy-config": "dist/copy-config.js"
-  },
   "author": "Tyler Grinn",
   "license": "MIT",
   "dependencies": {
     "@angular/core": "^5.1.2",
     "redux": "^3.7.2",
     "rxjs": "^5.5.6",
-    "typescript": "^2.6.2"
+    "typescript": "^2.6.2",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "@types/node": "^9.3.0"
+    "@types/node": "^9.3.0",
+    "@types/underscore": "^1.8.7"
   }
 }

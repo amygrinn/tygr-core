@@ -5,6 +5,8 @@ import { bindCallback } from 'rxjs/observable/bindCallback';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 
+import { isEqual } from 'underscore';
+
 import {
   Action,
   Store as IStore,
@@ -24,7 +26,7 @@ import { effectsMiddleware } from './effects.middleware';
 const defaultState = { root: '' };
 const defaultReducer: Reducer<string> = (state, action) => '';
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const composeEnhancers = (typeof window !== 'undefined') ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose : compose;
 
 declare var window: any;
 
@@ -54,11 +56,9 @@ export class TygrStore implements IStore<any> {
       }
     });
 
-    if (configs.includes(config => config.middlewares)) {
+    if (configs.some(config => !!config.middlewares)) {
       this.store = this.createStore();
-    }
-
-    if (configs.includes(config => config.reducer)) {
+    } else if (configs.some(config => !!config.reducer)) {
       this.replaceReducer(this.getReducer());
     }
   }
@@ -103,7 +103,9 @@ export class TygrStore implements IStore<any> {
     return createStore(
       this.getReducer(),
       this.store
-        ? this.store.getState()
+        ? isEqual(this.store.getState(), defaultState) 
+          ? {} 
+          : this.store.getState()
         : defaultState,
       composeEnhancers(
         applyMiddleware(...this.getMiddlewares())
@@ -131,7 +133,7 @@ export class TygrStore implements IStore<any> {
 
   private getMiddlewares(): Middleware[] {
     return [].concat(
-      ...this.configs.map(config => config.middlewares),
+      ...this.configs.filter(config => config.middlewares).map(config => config.middlewares),
       [effectsMiddleware]
     );
   }

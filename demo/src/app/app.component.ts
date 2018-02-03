@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 
 import { Store } from '@tygr/core';
 
+const test = 'hello';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
