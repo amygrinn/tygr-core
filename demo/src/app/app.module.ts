@@ -12,7 +12,7 @@ import { TygrModule } from '@tygr/core';
   ],
   imports: [
     BrowserModule,
-    TygrModule
+    TygrModule.forRoot({})
   ],
   providers: [],
   bootstrap: [AppComponent]

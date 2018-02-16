@@ -37,6 +37,7 @@ export class TygrStore implements IStore<any> {
   private configs: StoreConfig[] = [];
 
   constructor(
+    private customConfig,
     configs?: StoreConfig[]
   ) {
 
@@ -48,6 +49,9 @@ export class TygrStore implements IStore<any> {
   }
 
   public injectConfigs(...configs: StoreConfig[]) {
+
+    configs = configs.map(config => { return { ...config, ...this.customConfig[config.name] } });
+
     configs.forEach((config: StoreConfig) => {
       if (this.has(config)) {
         console.error('Configuration already exists in store, did you import it into two modules?');
@@ -89,6 +93,10 @@ export class TygrStore implements IStore<any> {
 
   public getState() {
     return this.store.getState();
+  }
+
+  public getConfig(name: string): StoreConfig {
+    return this.configs.find((config: StoreConfig) => config.name === name);
   }
 
   public subscribe(listener) {
